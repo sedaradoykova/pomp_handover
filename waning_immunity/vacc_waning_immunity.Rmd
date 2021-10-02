@@ -1,0 +1,159 @@
+---
+output: pdf_document
+fig_caption: yes
+header-includes:
+  - \usepackage{xcolor}
+  - \usepackage{caption}
+  - \usepackage{float}
+  - \usepackage{amsmath}
+---
+
+
+```{r echo=FALSE, fig.cap="", fig.show="hold", out.width="75%", fig.align='center'}
+knitr::include_graphics("vaccination_waning_immunity.png")
+```
+
+
+### Susceptible 
+
+$S_{t+1} = S_{t} (1 - \theta_{i} - \lambda_{t+1}) + f_{t}(R^{N};o,\omega^{N}) + f_{t}(R^{H};o,\omega^{H})$
+
+$S_{t+1}^{V} = S_{t}^{V} (1 - \lambda_{t+1}^{V}) + f_{t}(R^{V};s,\omega^{V}) + f_{t}(V;s,\omega^{V})$
+
+
+### Vaccinated
+
+$V_{t+1} = V_{t} +S_{t}\theta_{i}  -  f_{t}(V;s,\omega^{V})$
+
+
+### Exposed/infected 
+
+$E_{t+1} = E_{t} + S_{t}\lambda_{t+1} - f_{t}(E;m,\sigma)$ 
+
+$E_{t+1}^{V} = E_{t}^{V} + S_{t}\lambda_{t+1}^{V} - f_{t}(E^{V};q,\sigma^{V})$
+
+
+### Infectious
+
+$I_{t+1}^{A} = I_{t}^{A} + (1-\phi_{i}) f_{t}(E;m,\sigma) - f_{t}(I^{A};n,\gamma)$
+
+$I_{t+1}^{S} = I_{t}^{S} + \phi_{i} f_{t}(E;m,\sigma) - f_{t}(I^{S};n,\gamma)$
+
+$I_{t+1}^{V} = I_{t}^{V} + f_{t}(E^{V};q,\sigma^{V}) - f_{t}(I^{V};r,\gamma^{V})$
+
+
+### Recovered
+
+$R_{t+1}^{N} = R_{t}^{N} + f_{t}(I^{A};n,\gamma) + (1-\frac{p_{i}}{\phi_{i}}) f_{t}(I^{S};n,\gamma) -  f_{t}(R^{N};o,\omega^{N})$
+
+$R_{t+1}^{H} = R_{t}^{H} + \frac{p_{i}}{\phi_{i}} f_{t}(I^{S};n,\gamma) -  f_{t}(R^{H};o,\omega^{H})$
+
+$R_{t+1}^{VH} = R_{t}^{VH} +f_{t}(I^{V};r,\gamma^{V}) -  f_{t}(R^{V};s,\omega^{V})$
+
+
+\newpage
+## Parameters 
+
+Table \ref{params} summarises all parameters. 
+
+\begin{table}[h!]
+\caption{Summary of parameters.}
+\label{params}
+\begin{tabular}{|l l|}
+\hline
+Symbol & Parameter \\
+\hline
+ $R_{0}$ & basic reproduction number \\
+ $R_{c}$ & reproduction number under control measures for an entirely susceptible population \\
+ $R_{t}$ & effective reporduction number in the presence of immunity \\
+ $\theta_{i,t}$ & time-specificprobability of vaccination \\
+ $\sigma$ & latency period mean \\
+   $m$ & latency period shape non-vaccinated \\
+   $q$ & latency period shape vaccinated \\
+ $\gamma$ & infectious period mean \\
+   $n$ & infectious period shape non-vaccinated \\
+   $r$ & infectious period shape vaccinated \\
+ $\omega^{N}$ & immune duration mean non-hospitalized non-vaccinated case \\
+ $\omega^{H}$ & immune duration mean hospitalized non-vaccinated case \\
+   $o$ & immune duration shape non-vaccinated \\
+ $\omega^{VN}$ & immune duration mean non-hospitalized vaccinated case \\
+ $\omega^{VH}$ & immune duration mean hospitalized vaccinated case \\
+ $\omega^{VH}$ & immune duration mean vaccinated individual \\
+   $s$ & immune duration shape vaccinated \\
+ $\phi_{i}$ & probability of asymptomatic case given infection (non-vaccinated) \\
+ $\tau_{i}$ & probability of asymptomatic case given infection (vaccinated) \\
+ $p_{i}$ & probability of hospitalisaion given infection (non-vaccinated)\\
+ $p_{i}^{V}$ & probability of hostpitalisation given infection (vaccinated) \\
+ $C=c_{i,j}$ & contact matrix \\
+ $\eta_{i}$ & relative susceptibility of age group $i$ \\
+ $\upsilon$ & relative infectiousness of asymptomatic cases \\
+ $\mu$ & relative infectiousness of vaccinated cases (symptomatic and asymptomatic??) \\
+\hline
+\end{tabular}
+\end{table}
+
+
+### Next generation matrix
+- Expected number of secondary infections in age group $i$ resulting from contact with an index case in age group $j$:  \newline
+$k_{ij} = \frac{\beta}{\gamma} \eta_{i} c_{i,j} (\phi\nu+(1-\phi_{i}))$  
+    - $\eta_{i}$ = relative susceptibility of of age group $i$;
+    - $\nu$ = relative infectiousness of asymptomatic cases.
+    - $c_{i,j}$ = average number of daily contacts between a single individual in age group $j$ and all individuals in age group $i$;
+- The basic reproduction number $R_{0}$ is given by the spectral radius $\rho(K)$ = the largest absolute eigenvalue of $K$.
+- As $R_{0}$ is specified in the model, the transmission parameter $\beta$ is left as a free parameter that is scaled to the correct value.
+
+
+### Force of infection
+- $\lambda_{i,t+1}$ = force of infection acting on a single individual in age group $i$ at time $t+1$: \newline 
+$\lambda_{i,t+1} = \beta \eta_{i} \sum_{j=1}^{M} \frac {c_{i,j}N_{j}} {N_{i}} (\frac {I_{j,t}^{S} + I_{j,t}^{A}\nu} {N_{j}})$
+$\lambda_{i,t+1} = \frac {\beta \eta_{i}} {N_{i}} \sum_{j=1}^{M} c_{i,j} ({I_{j,t}^{S}+I_{j,t}^{A}\nu})$
+    - $M$ = number of discrete age groups ($M = 15$);
+    - $N_{i}$ = population size of age group i.
+
+
+\newpage
+## Model Assumptions
+- Model assumes that individuals are vaccinated and gain immunity at some rate (probability) constnant per age group $\theta_{i}$. 
+    - Could make this $f_{t}(...)$? 
+- $E^{V}$, $I^{V}$, and $R^{V}$ have their own $F_{t}$ parameters which differ between vaccinated and non-vaccinated individuals. 
+- Vaccinated individuals who recover from infection "replenish" their vaccination immunity, *i.e.*, $R^{V}$ flows into $V$.
+
+
+### No longer sure about these assumptions... 
+- $E^{V}$ flows into own $I^{V}$ compartment, allowing adjustment of infectiousness. 
+    - Implicitly, vaccination protects against symptomatic and/or asymptomatic disease.
+- There end up being two different forces of infection for vaccinated and unvaccinated people: $\lambda^{V}$ and $\lambda^{N}$. It would be better to formulate a more complex expression for $\lambda_{t}$ which accounts for vaccination. 
+
+
+## Questions to answer
+- Are vaccinated individuals less susceptible to infection than non-vaccinated ones? 
+- Does vaccinatoin protect against symptomatic disease? (Rather what is the proportion of asymptomatic cases in the infections reported by vaccinated individuals?)
+- Do infected vaccinated individuals "replenish" their immunity upon recovery from infection? 
+    - Is the effect the same for symptomatic and asymptomatic cases?
+- Does vaccination protect against hospitalisation? 
+- Do the R boxes contribute to transmission? 
+
+## To do
+- Are vaccinated individuals more suscseptible to infection than non-vaccinated, *i.e.* $S^{V}=S$?
+    - If $S^{V}\not=S$, then $\lambda^{V}\not=\lambda$. 
+    - Then we need to change $\eta_{i}$, the relative susceptibility by age group.
+- Vaccine distribution (and therefore immunity) $\sim$ age group. Therefore, immunity will differ by age group. 
+    - If immunity differs by age group susceptibility might too. 
+- Find **probability** of *asymptomatic case* given *vaccinated infection/case*
+- Find **probability** of *hospitalisation* given *symptoamtic vaccinated case/infection* 
+    - Oxford paper has plenty of data which might be useful. (Intercept, odds -> probabilities.) 
+
+
+## Possible angles
+- Future of the pandemic i.e. what the winter will look like. 
+- Booster shot vs no booster shot ~ impact on transmission 
+- Waning immunity vs immune evasion vs increased contact *i.e.* how much vaccinated people transmit Delta? 
+  - Implicaions: vaccine passports & booster shots 
+- Herd immunity with imperfect vaccination? 
+
+
+
+
+
+
+
